@@ -1,0 +1,26 @@
+/*居中对其*/
+.col-center-block {
+    float: none;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+按钮右对齐
+.right {
+    float:right;
+    /*margin:0px auto 0px auto;*/
+}
+
+.left {
+    float:left;
+    /*margin:0px auto 0px auto;*/
+}
+
+.error{
+    background: #fb8344;
+    color:#fff !important;
+    text-align: center;
+    line-height: 40px !important;
+    margin:10px 0;
+}
+

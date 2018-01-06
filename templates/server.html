@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}
+    游戏设置
+{% endblock %}
+{% block content %}
+    <script>
+    $.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});
+    function sub() {
+        var form = new FormData(document.getElementById("target"));
+        $.ajax({
+            url:{% url 'game' %} ,
+            type:"POST",
+            data:form,
+            dataType:"json",
+            processData:false,
+            contentType:false,
+            success:function (data) {
+                console.log(data)
+            },
+        })
+    }
+    
+    
+    </script>
+    <div class="col-center-block col-xs-12 col-sm-6 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-floppy-disk"></span><span> 游戏列表</span>
+                <span>
+                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">
+                        +
+                    </button>
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="addGame">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="addGame">添加游戏</h4>
+                                </div>
+                                <form id="target" role="form">
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="server">服务器列表</label>
+                                            <select name="ip" class="form-control input-sm">
+                                                <option selected value="">请选择</option>
+                                                {% for i in ip %}
+                                                    <option value="{{ i.ip }}">{{ i.ip }}</option>
+                                                {% endfor %}
+
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="name">名称</label>
+                                            <input id="name" name="name" class="form-control" placeholder="name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="version">版本</label>
+                                            <select name="version" class="form-control input-sm">
+                                                <option selected value="">请选择</option>
+                                                <option value="1.7.2">1.7.2</option>
+                                                <option value="1.7.4">1.7.4</option>
+                                                <option value="1.7.5">1.7.5</option>
+                                                <option value="1.7.6">1.7.6</option>
+                                                <option value="1.7.7">1.7.7</option>
+                                                <option value="1.7.8">1.7.8</option>
+                                                <option value="1.7.9">1.7.9</option>
+                                                <option value="1.7.10">1.7.10</option>
+                                                <option value="1.8">1.8</option>
+                                                <option value="1.8.1">1.8.1</option>
+                                                <option value="1.8.2">1.8.2</option>
+                                                <option value="1.8.3">1.8.3</option>
+                                                <option value="1.8.4">1.8.4</option>
+                                                <option value="1.8.5">1.8.5</option>
+                                                <option value="1.8.6">1.8.6</option>
+                                                <option value="1.8.7">1.8.7</option>
+                                                <option value="1.8.8">1.8.8</option>
+                                                <option value="1.8.9">1.8.9</option>
+                                                <option value="1.9">1.9</option>
+                                                <option value="1.9.2">1.9.2</option>
+                                                <option value="1.10">1.10</option>
+                                                <option value="1.10.2">1.10.2</option>
+                                                <option value="1.10">1.10</option>
+                                                <option value="1.10.2">1.10.2</option>
+                                                <option value="1.12.2">1.12.2</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="alert alert-success alert-dismissable hidden" id="success" role="alert">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <p class="text-left">提交成功</p>
+                                        </div>
+                                        <div class="alert alert-warning alert-dismissible hidden" id="waring" role="alert">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <p class="text-left">正在提交</p>
+                                        </div>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                        <button type="button" onclick="sub()" class="btn btn-primary">保存</button>
+                                    </div>
+                                    {% csrf_token %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </span>
+
+            </div>
+
+            <div class="panel-body">
+                {% for key,value in msg.items %}
+                    {% for foo,x in value.items %}
+                        <div class="panel panel-info">
+                            <div class="panel-heading">游戏名字:{{ foo }}</div>
+                            <div class="panel-body">
+                                <div>
+                                    <div class="col-md-8">
+                                        <p><b>IP:</b>{{ key }}</p>
+                                        <p><b>状态：</b>关闭|<b>MC版本:</b>1.12.2</p>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <p></p>
+                                        <button type="button" onclick="window.location.href = '{% url 'add_game' id=x %}'" class="btn btn-success">
+                                            控制|管理
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

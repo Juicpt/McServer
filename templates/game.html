@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}
+    控制|管理
+{% endblock %}
+
+{% block content %}
+    <div class="col-center-block col-xs-12 col-sm-6 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">游戏名字:{{ name }}</h4>
+            </div>
+            <div class="panel-body">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        服务器操作
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-info">启动</button>
+                                <button type="button" class="btn btn-warning">重启</button>
+                                <button type="button" class="btn btn-danger">关闭</button>
+                            </div>
+
+                            <div class="col-md-4"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        服务器实时状态
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-info">命令控制台</button>
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

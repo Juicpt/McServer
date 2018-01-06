@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block title %}
+    设置
+{% endblock %}
+{% block content %}
+    <script>
+        $.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});
+        $(document).ready(function () {
+            $("#api-select").hide();
+            $("#ip-select").hide();
+            $("#select").change(function(){
+                if($(this).val()=="api")
+                {
+                    $("#api-select").show();
+                    $("#api-select").find(":input").attr("disabled", false);
+                    $("#ip-select").hide();
+                    $("#ip-select").find(":input").attr("disabled", true);
+                }
+                else if($(this).val() == "ip")
+                {
+                    $("#api-select").hide();
+                    $("#api-select").find(":input").attr("disabled", true);
+                    $("#ip-select").show();
+                    $("#ip-select").find(":input").attr("disabled", false);
+                }
+                else
+                {
+                    $("#api-select").hide();
+                    $("#api-select").find(":input").attr("disabled", true);
+                    $("#ip-select").hide();
+                    $("#ip-select").find(":input").attr("disabled", true);
+                }
+            });
+        });
+
+        function java7(p) {
+            ip = p;
+            post_data = {'cmd':'install','java':7,'ip':p};
+            $.ajax({
+                url:{% url 'java' %},
+                type:"POST",
+                data:post_data,
+                dataType:"json",
+                success: function (data) {
+                    console.log(data);
+                    window.location.reload();
+
+                }
+                }
+            )
+        }
+        function java8(p) {
+            ip = p;
+            post_data = {'cmd':'install','java':8,'ip':p};
+            $.ajax({
+                url:{% url 'java' %},
+                type:"POST",
+                data:post_data,
+                dataType:"json",
+                success: function (data) {
+                    console.log(data);
+
+                }
+                }
+            )
+        }
+        function java_check(p) {
+            ip = p.ip;
+            post_data = {'cmd':'check','ip':p};
+            $.ajax({
+                url:{% url 'java' %},
+                type:"POST",
+                data:post_data,
+                dataType:'json',
+                success:function (data) {
+
+                    java_version = $('#'+data.id);
+                    java_version.text(data.java_version);
+                    if (data.java_version != 'None')
+                    {
+                        console.log(data);
+                        console.log(data.id);
+                    }
+                    else
+                    {
+                        setTimeout('window.location.reload()',2000);
+                        console.log(data);
+                        console.log(data.id);
+                    }
+
+                }
+            })
+
+        }
+    </script>
+
+    <div class="col-center-block col-xs-12 col-sm-6 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-floppy-disk"></span><span> 服务器列表</span>
+                <span>
+                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">
+                        +
+                    </button>
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="addServer">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="addServer">添加服务器</h4>
+                                </div>
+                                <form action="{% url 'setting' %}" method="post" role="form">
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="server">添加方式</label>
+                                            <select class="form-control input-sm" name="add_type" id="select">
+                                                <option selected value="">请选择</option>
+                                                <option value="api" id="api">api添加</option>
+                                                <option value="ip" id="ip">IP添加</option>
+                                            </select>
+                                        </div>
+                                        <div id="api-select">
+                                            <div class="form-group">
+                                                <label for="SecretId">SecretId</label>
+                                                <input id="SecretId" name="SecretId" class="form-control" placeholder="SecretId">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="SecretKey">SecretKey</label>
+                                                <input id="SecretKey" name="SecretKey" type="password" class="form-control" placeholder="SecretKey">
+                                            </div>
+                                        </div>
+                                        <div id="ip-select">
+                                            <div class="form-group">
+                                                <label for="ip">IP</label>
+                                                <input id="ip" name="ip" type="ip" class="form-control" placeholder="127.0.0.1">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="root">用户名</label>
+                                                <input id="user" name="user" type="text" class="form-control" placeholder="root">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="password">密码</label>
+                                                <input id="password" name="password" type="password" class="form-control" placeholder="password">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="btn">
+                                            {{ erro }}
+                                        </div>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                        <button type="submit" class="btn btn-primary">保存</button>
+                                    </div>
+                                    {% csrf_token %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </span>
+            </div>
+            <div class="panel-body">
+                {% for x in ip %}
+                    {% if x.java == 1%}
+                        <div class="panel panel-info">
+                            <div class="panel-heading">{{ x.ip }}</div>
+                            <div class="panel-body">
+                                <label>IP:</label>{{ x.ip }}
+                                <div>
+                                    <label>Java:</label>{{ x.java_version }}
+                                    <button type="button" value={{ x.ip }} class="btn btn-default">Java7</button>
+                                    <button type="button" value={{ x.ip }} class="btn btn-default">Java8</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="panel panel-info">
+                            <div class="panel-heading">{{ x.ip }}</div>
+                            <div class="panel-body">
+                                <label>IP:</label>{{ x.ip }}
+                                <div>
+                                    <label>Java版本检查</label>
+                                    <button onclick="java_check(value)" value="{{ x }}" type="button" class="btn btn-default">检查</button><label id="{{ x.id }}"></label>
+                                </div>
+                                <div>
+                                    <label>安装Java版本</label>
+                                    <button onclick="java7(value)" value="{{ x.ip }}" type="button" class="btn btn-default">Java7</button>
+                                    <button onclick="java8(value)" value="{{ x.ip }}" type="button" class="btn btn-default">Java8</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

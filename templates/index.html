@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}
+    首页
+{% endblock %}
+
+{% block content %}
+    <script src="/static/js/echarts.min.js"></script>
+    <script>
+        option = null;
+        var app={};
+        option = {
+            title: {
+                text: '',
+                x: '48.8%',
+                y: '45%',
+                textAlign: "center",
+                textStyle: {
+                    fontWeight: 'normal',
+                    fontSize: 24
+                },
+                subtextStyle: {
+                    fontWeight: 'bold',
+                    fontSize: 32,
+                    color: '#3ea1ff'
+                }
+            },
+            series: [{
+                name: ' ',
+                type: 'pie',
+                radius: ['50%', '70%'],
+                startAngle: 225,
+                color: [new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: '#00a2ff'
+                }, {
+                    offset: 1,
+                    color: '#70ffac'
+                }]), "transparent"],
+                hoverAnimation: false,
+                legendHoverLink: false,
+                itemStyle: {
+                    normal: {
+                        borderColor: "transparent",
+                        borderWidth: "10"
+                    },
+                    emphasis: {
+                        borderColor: "transparent",
+                        borderWidth: "20"
+                    }
+                },
+                z: 10,
+                labelLine: {
+                    normal: {
+                        show: false
+                    }
+                },
+                data: [{
+                    value: 75
+                }, {
+                    value: 25
+                }]
+            }, {
+                name: '',
+                type: 'pie',
+                radius: ['50%', '70%'],
+                startAngle: 225,
+                color: ["#c2f5e1", "transparent"],
+                labelLine: {
+                    normal: {
+                        show: false
+                    }
+                },
+                data: [{
+                    value: 75
+                }, {
+                    value: 25
+                }]
+            }
+
+            ]
+        };
+        socket = new WebSocket("ws://" + window.location.host + "/chat/");
+        socket.onmessage = function(sj) {
+
+            p = JSON.parse(sj.data);
+            console.log(p)
+            setPercent(p);
+            setTimeout('socket.send("")',5000)
+
+        }
+        socket.onopen = function() {
+            socket.send("");
+        }
+        if (socket.readyState == WebSocket.OPEN)
+            socket.onopen();
+
+        function setPercent(p) {
+            var value,value_;
+            var Cpu = echarts.init(document.getElementById('cpu'));
+            var cpu_value = parseInt(p.cpu),
+                cpu_value_ = 75 * cpu_value / 100;
+            option.title.text = "CPU";
+            option.title.subtext = cpu_value + "%";
+            option.series[0].data[0].value = cpu_value_;
+            option.series[0].data[1].value = 100 - cpu_value_;
+            Cpu.setOption(option, true);
+            var mem = echarts.init(document.getElementById('mem'));
+            value = parseInt(p.mem);
+            value_ = 75 * value / 100;
+            option.title.text = "内存";
+            option.title.subtext = value + "%";
+            option.series[0].data[0].value = value_;
+            option.series[0].data[1].value = 100 - value_;
+            mem.setOption(option, true);
+
+        }
+    </script>
+    <div class="col-center-block col-xs-12 col-sm-6 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">服务器信息</h4>
+            </div>
+            <ul class="list-group">
+                <li class="list-group-item">Python版本:{{ py_version }}</li>
+                <li class="list-group-item">服务器地址:{{ ip }}</li>
+                <li class="list-group-item">服务器系统:{% for x in sys %}{{ x }}  {% endfor %}</li>
+                <li class="list-group-item">CPU信息:{{ cpu }}</li>
+                <li class="list-group-item">内存:{{ mem }}</li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-center-block col-xs-12 col-sm-6 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">服务器状态</h4>
+            </div>
+            <div class="panel-body">
+                <canvas id="cpu"></canvas>
+                <canvas id="mem"></canvas>
+            </div>
+        </div>
+    </div>
+{% endblock %}
