@@ -7,9 +7,10 @@
 
 
 from channels.routing import route
-from websocket.consumers import MyConsumer
+from websocket.consumers import MyConsumer,cmd
 
 channel_routing = [
     MyConsumer.as_route(path=r"^/chat/"),
+    cmd.as_route(path=r'/cmd/'),
 
 ]

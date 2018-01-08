@@ -10,10 +10,21 @@ from connect import con_client
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+class cmd(LoginRequiredMixin,View):
+    login_url = '/login/'
+
+    def get(self,request,id):
+        mc_id = id
+        print(id)
+        print(request.get_full_path())
+        return render(request,'command.html',{'id':mc_id})
+
+
 class profile(LoginRequiredMixin,View):
     login_url = '/login/'
 
     def get(self,request,id):
+
 
 
         table={

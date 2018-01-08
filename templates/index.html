@@ -82,9 +82,7 @@
         };
         socket = new WebSocket("ws://" + window.location.host + "/chat/");
         socket.onmessage = function(sj) {
-
             p = JSON.parse(sj.data);
-            console.log(p)
             setPercent(p);
             setTimeout('socket.send("")',5000)
 
@@ -92,8 +90,7 @@
         socket.onopen = function() {
             socket.send("");
         }
-        if (socket.readyState == WebSocket.OPEN)
-            socket.onopen();
+        if (socket.readyState == WebSocket.OPEN) socket.onopen();
 
         function setPercent(p) {
             var value,value_;

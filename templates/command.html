@@ -5,6 +5,21 @@
 
 {% block content %}
 
+    <script>
+        socket = new WebSocket("ws://" + window.location.host + "/cmd/");
+        socket.onmessage = function(x) {
+            console.log(x.data)
+
+        }
+        socket.onopen = function() {
+
+            var x='{"id":"{{ id }}"}';
+            console.log(x)
+
+            socket.send(x);
+        }
+        if (socket.readyState == WebSocket.OPEN) socket.onopen();
+    </script>
     <div class="col-center-block col-xs-12 col-sm-6 col-md-8">
         <div class="panel panel-default">
             <div class="panel-heading">

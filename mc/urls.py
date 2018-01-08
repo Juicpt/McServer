@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 from user.views import LoginView,LogoutView,HomeView
-from server.views import game,setting,java,add_game,game_inf,profile
+from server.views import game,setting,java,add_game,game_inf,profile,cmd
 
 
 urlpatterns = [
@@ -27,7 +27,7 @@ urlpatterns = [
     path('game/', game.as_view(), name='game'),
     path('game/<int:id>/', add_game.as_view(),name = 'add_game'),
     path('game/<int:id>/profile/',profile.as_view(),name='profile'),
-    path('game/<int:id>/command/',TemplateView.as_view(template_name='command.html'), name='command'),
+    path('game/<int:id>/command/',cmd.as_view(), name='command'),
     path('setting/', setting.as_view(), name='setting'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('java/',java.as_view(),name='java'),
