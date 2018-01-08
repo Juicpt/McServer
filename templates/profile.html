@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}
+    游戏配置
+{% endblock %}
+{% block content %}
+    <script>
+        $.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});
+        function save() {
+            var form = new FormData(document.getElementById("target"));
+            $.ajax({
+                type:"POST",
+                data:form,
+                dataType:"json",
+                processData:false,
+                contentType:false,
+                success:function (data) {
+
+                },
+            });
+        };
+
+
+        $(document).ready(function () {
+            var text={'data':'data'};
+            $.ajax({
+
+                type:"POST",
+                data:text,
+                dataType:"json",
+                success:function (data) {
+                    for(var a in data){
+                        $('#' + a).val(data[a]);
+                    };
+                }
+
+            });
+
+
+        });
+
+    </script>
+    <div class="col-center-block col-xs-12 col-sm-6 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">配置文件</h4>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <p>您可以进行以下操作:</p>
+                    <button class="btn btn-default">返回</button>
+                    <button class="btn btn-success" onclick="save()">更新配置</button>
+                    <p>解释: true 代表开, false 代表关,空白代表无值，请注意格式修改，确认无误保存即可，重启服务端生效</p>
+                    <form id="target">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <th>原字段键值</th>
+                                <th>第三方解释</th>
+                                <th>存在的值</th>
+                            </tr>
+                            {% for key,value in table.items %}
+                                <tr>
+                                    <th>{{ key }}</th>
+                                    <th>{{ value }}</th>
+                                    <th>
+                                        <div class="input-group  input-group-sm">
+                                            <input type="text" class="form-control" aria-describedby="basic-addon1" name="{{ key }}" id="{{ key }}" value="" />
+                                        </div>
+                                    </th>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

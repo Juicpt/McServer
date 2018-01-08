@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 from user.views import LoginView,LogoutView,HomeView
-from server.views import game,setting,java,add_game
+from server.views import game,setting,java,add_game,game_inf,profile
 
 
 urlpatterns = [
@@ -25,9 +25,11 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('', HomeView.as_view(), name='index'),
     path('game/', game.as_view(), name='game'),
-    path('game/<int:id>/',add_game.as_view(),name = 'add_game'),
+    path('game/<int:id>/', add_game.as_view(),name = 'add_game'),
+    path('game/<int:id>/profile/',profile.as_view(),name='profile'),
     path('setting/', setting.as_view(), name='setting'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('java/',java.as_view(),name='java'),
+    path('game_inf/',game_inf.as_view(),name='game_inf')
 
 ]

@@ -1,6 +1,6 @@
 from django.shortcuts import render,reverse
 from django.views.generic.base import View
-from django.http import HttpResponse,JsonResponse,HttpResponseNotFound
+from django.http import HttpResponse,JsonResponse,HttpResponseNotFound,QueryDict
 import json,paramiko,urllib,MC,sys,os,random,string,time
 from django.contrib.auth.mixins import LoginRequiredMixin
 from user.models import server,ip_or_api,add_way,mc_inf
@@ -10,19 +10,108 @@ from connect import con_client
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+class profile(LoginRequiredMixin,View):
+    login_url = '/login/'
+
+    def get(self,request,id):
+
+
+        table={
+            'generator-settings':'用于自定义超平坦世界的生成，不生成超平坦世界请留空',
+            'allow-nether':'是否允许下界（包括地狱）',
+            'level-name':'世界（地图）名称 不要使用中文',
+            'enable-query':'是否允许使用GameSpy4协议的服务器监听器',
+            'allow-flight':'是否允许玩家飞行（在任何游戏模式下）',
+            'server-port':'服务器端口',
+            'level-type':'地图的生成类型',
+            'enable-rcon':'是否允许远程访问服务器控制台',
+            'force-gamemode':'强制玩家加入时为默认游戏模式',
+            'level-seed':'地图种子 默认留空',
+            'server-ip':'服务器ip，若不绑定请留空',
+            'max-build-height':'玩家在服务器放置方块的最高高度',
+            'spawn-npcs':'是否生成村民',
+            'white-list':'是否开启白名单',
+            'spawn-animals':'是否生成动物',
+            'snooper-enabled':'启用数据采集',
+            'hardcore':'极限模式（死后自动封禁）',
+            'texture-pack':'材质包',
+            'online-mode':'在线（正版）验证',
+            'pvp':'是否允许玩家掐架',
+            'difficulty':'难度0=和平 1=简单 2=普通 3=困难',
+            'player-idle-timeout':'允许的挂机时间，单位为分钟 超过限制后自动T出服务器',
+            'gamemode':'游戏模式 0=生存 1=创造 2=冒险 3=旁观',
+            'max-players': '服务器最大玩家数限制',
+            'spawn-monsters':'生成攻击型生物（怪物）',
+            'view-distance': '服务器发送给客户端的数据量，决定玩家能设置的视野',
+            'generate-structures': '生成世界时生成结构（如村庄）禁止后地牢和地下要塞仍然生成',
+            'motd': '服务器信息展示 若使用ColorMotd等插件可留空该选项',
+            'op-permission-level': 'OP权限等级',
+            'announce-player-achievements': '玩家获得成就时，是否在服务器聊天栏显示（是否允许其装X）',
+            'network-compression-threshold': '网络压缩阈值',
+            'resource-pack-sha1': '资源包的SHA-1值，必须为小写十六进制，不是必填选项',
+            'enable-command-block': '启用命令方块',
+            'resource-pack': '统一资源标识符 (URI) 指向一个资源包。玩家可选择是否使用',
+            'max-world-size': '最大世界大小',
+            'prevent-proxy-connections':'',
+            'use-native-transport':'',
+            'max-tick-time':'',
+
+
+        }
+
+
+        return render(request,'profile.html',{'table':table})
+
+    def post(self,request,id):
+        server_id = mc_inf.objects.get(id=id).server.id
+        name = mc_inf.objects.get(id=id).name
+        ip = server.objects.get(id=server_id).ip
+        secrect = server.objects.get(id=server_id).secrect.encode('utf-8')
+        if request.POST.get('data') == 'data':
+            try:
+                connect = con_client(ip, secrect)
+            except ConnectionRefusedError:
+
+                return JsonResponse({'erro':'erro'})
+            data = {'type':'cmd','step':'process','control':'profile','cmd':'get','name':name}
+            data = json.dumps(data)
+            connect.send(data)
+            getdata = connect.recv()
+            connect.close()
+            get_data = json.loads(getdata)
+
+            return JsonResponse(get_data)
+        else:
+            try:
+                connect = con_client(ip, secrect)
+            except ConnectionRefusedError:
+                return JsonResponse({'erro':'erro'})
+            for key,value in request.POST.items():
+                data = {'type': 'cmd', 'step': 'process', 'control': 'profile', 'cmd': 'save', 'name': name,'key':key,'value':value}
+                data = json.dumps(data)
+                connect.send(data)
+                getdata = connect.recv()
+
+
+            connect.close()
+            return JsonResponse({'ok':'ok'})
+
+
+
 class game(LoginRequiredMixin,View):
 
     login_url = '/login/'
 
     def get(self,request):
         user = request.user
+        ip = server.objects.filter(user_id = user.id)
         a= user.server_set.all()
         value={}
         for x in a:
             value[x.ip] = {}
             for y in x.mc_inf_set.all():
                 value[x.ip][y.name] = y.id
-        return render(request,'server.html',{'msg':value})
+        return render(request,'server.html',{'msg':value,'ip':ip})
     # 信息提交
     def post(self,request):
         name = request.POST.get('name')
@@ -51,12 +140,31 @@ class add_game(LoginRequiredMixin,View):
     login_url = '/login/'
 
     def get(self,request,id):
+
         user_id = mc_inf.objects.get(id=id).server.user.id
         name = mc_inf.objects.get(id=id).name
         if  user_id== request.user.id:
-            return render(request, 'game.html',{'name':name})
+            return render(request, 'game.html',{'name':name,'id':id})
 
 
+# 游戏启动重启关闭
+class game_inf(LoginRequiredMixin,View):
+    login_url = '/login/'
+    def post(self,request):
+        control= request.POST.get('control')
+        id = request.POST.get('id')
+        name = mc_inf.objects.get(id=id).name
+        try:
+            secrect = mc_inf.objects.get(id=id).server.secrect.encode('utf-8')
+            connect = con_client(mc_inf.objects.get(id=id).server.ip,secrect)
+        except ConnectionRefusedError:
+            return JsonResponse({'java_version': '连接不上服务器'})
+        data={'type':'cmd','step':'process','control':control,'name':name,'mc':'server'}
+        data = json.dumps(data)
+        connect.send(data)
+        inf = connect.recv()
+        connect.close()
+        return JsonResponse({'ok':'ok'})
 
 
 
@@ -144,6 +252,7 @@ class java(View):
             data = json.dumps(data)
             connect.send(data)
             version = connect.recv()
+            connect.close()
             if version == 'None':
                 id = server.objects.get(ip=ip).id
                 return JsonResponse({'java_version': version,'id':id})
@@ -169,6 +278,7 @@ class java(View):
             data = json.dumps(data)
             connect.send(data)
             inf = connect.recv()
+            connect.close()
             return JsonResponse({'ok': inf})
         else:
             print('参数错误')

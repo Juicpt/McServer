@@ -56,7 +56,7 @@ class server_api(models.Model):
 
 class server(models.Model):
     # name = models.CharField(blank=False,max_length=100,verbose_name='服务器名称')
-    user  = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete='PROTECT')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete='PROTECT')
     ip = models.GenericIPAddressField(blank=False,max_length=30,unique=True,verbose_name='IP')
     secrect = models.CharField(blank=False,max_length=100,verbose_name='密钥')
     java = models.BooleanField(default=False,verbose_name='Java是否安装')

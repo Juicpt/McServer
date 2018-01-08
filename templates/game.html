@@ -2,12 +2,53 @@
 {% block title %}
     控制|管理
 {% endblock %}
-
 {% block content %}
+    <script>
+        $.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});
+        function start() {
+            post_data = {'control':'start','id':{{id}}};
+            $.ajax({
+                url:{% url 'game_inf' %},
+                type:"POST",
+                data:post_data,
+                dataType:"json",
+                success:function (data) {
+                    console.log(data);
+
+                },
+            });
+        };
+        function stop() {
+            post_data = {'control':'stop','id':{{id}}};
+            $.ajax({
+                url:{% url 'game_inf' %},
+                type:"POST",
+                data:post_data,
+                dataType:"json",
+                success:function (data) {
+                    console.log(data);
+
+                },
+            });
+        };
+        function restart() {
+            post_data = {'control':'restart','id':{{id}}};
+            $.ajax({
+                url:{% url 'game_inf' %},
+                type:"POST",
+                data:post_data,
+                dataType:"json",
+                success:function (data) {
+                    console.log(data);
+
+                },
+            });
+        };
+    </script>
     <div class="col-center-block col-xs-12 col-sm-6 col-md-8">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">游戏名字:{{ name }}</h4>
+                <h4 class="panel-title"><span>游戏名字:{{ name }}</span></h4>
             </div>
             <div class="panel-body">
                 <div class="panel panel-info">
@@ -18,9 +59,9 @@
                         <div class="row">
                             <div class="col-md-4"></div>
                             <div class="col-md-4">
-                                <button type="button" class="btn btn-info">启动</button>
-                                <button type="button" class="btn btn-warning">重启</button>
-                                <button type="button" class="btn btn-danger">关闭</button>
+                                <button onclick="start()" type="button" class="btn btn-info">启动</button>
+                                <button onclick="restart()" type="button" class="btn btn-warning">重启</button>
+                                <button onclick="stop()" type="button" class="btn btn-danger">关闭</button>
                             </div>
 
                             <div class="col-md-4"></div>
@@ -36,6 +77,7 @@
                             <div class="col-md-4"></div>
                             <div class="col-md-4">
                                 <button type="button" class="btn btn-info">命令控制台</button>
+                                <button type="button" class="btn btn-success" onclick="window.location.href = '{% url 'profile' id=id %}'" >服务器配置</button>
                             </div>
                             <div class="col-md-4"></div>
                         </div>

@@ -4,21 +4,21 @@
 {% endblock %}
 {% block content %}
     <script>
-    $.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});
-    function sub() {
-        var form = new FormData(document.getElementById("target"));
-        $.ajax({
-            url:{% url 'game' %} ,
-            type:"POST",
-            data:form,
-            dataType:"json",
-            processData:false,
-            contentType:false,
-            success:function (data) {
-                console.log(data)
-            },
-        })
-    }
+        $.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});
+        function sub() {
+            var form = new FormData(document.getElementById("target"));
+            $.ajax({
+                url:{% url 'game' %},
+                type:"POST",
+                data:form,
+                dataType:"json",
+                processData:false,
+                contentType:false,
+                success:function (data) {
+                    console.log(data)
+                },
+            })
+        }
     
     
     </script>

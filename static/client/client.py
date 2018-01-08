@@ -10,13 +10,14 @@ import re
 import json
 import hmac
 import sys
+import tempfile
 # 服务器命令执行
 class cmd(object):
 
-    def __init__(self):
+    def __init__(self,cwd):
         self.server = None
         self.tmpFile = '/tmp/%s.tmp' % random.randint(10000, 999999)
-        self.cwd = os.getcwd()
+        self.cwd = cwd
     # 命令执行
     def start(self,cmd):
         with open(self.tmpFile, 'w') as fpWrite:
@@ -30,7 +31,7 @@ class cmd(object):
             self.server.stdin.write(bytes(command + "\r\n", "ascii"))
             self.server.stdin.flush()
             os.popen('rm -rf %s' % self.tmpFile)
-            print('结束')
+
     # 日志获取
     def read_log(self,sock):
         with open(self.tmpFile, 'r') as file:
@@ -42,6 +43,63 @@ class cmd(object):
                     file.seek(where)
                 else:
                     sock.send(line.encode('utf-8'))
+
+
+class properties(object):
+    def __init__(self,name):
+
+        self.file_name = '/home/' + name + '/server.properties'
+        self.properties = {}
+        try:
+            with open(self.file_name, 'r') as fpwrite:
+                for line in fpwrite:
+                    if line.find('=') > 0 and not line.startswith('#'):
+                        key=line.replace('\n', '').split('=')
+                        self.properties[key[0]]=key[1]
+
+        except Exception as e:
+            print(e)
+
+    def get_dict(self):
+        return self.properties
+
+    def put(self,key,value):
+        self.properties[key] = value
+        self.replace_property(key + '=.*' , key + '=' + value,True)
+
+    def replace_property(self,from_regex,to_str,append_on_not_exists = True):
+        file = tempfile.TemporaryFile(mode='w+t')
+        if os.path.exists(self.file_name):
+            r_open = open(self.file_name,'r')
+            pattern = re.compile('' + from_regex)
+            found = None
+            for line in r_open:
+                if pattern.search(line) and not line.strip().startswith('#'):
+                    found = True
+                    line = re.sub(from_regex,to_str,line)
+                file.write(line)
+
+            if not found and append_on_not_exists:
+                file.write('\n' + to_str)
+
+            r_open.close()
+
+            file.seek(0)
+
+            content = file.read()
+
+            if os.path.exists(self.file_name):
+                os.remove(self.file_name)
+
+            w_open =open(self.file_name,'w')
+            w_open.write(content)
+            w_open.close()
+
+
+            file.close()
+
+        else:
+            print("file %s not fount" %self.file_name)
 
 
 class connection(object):
@@ -85,12 +143,15 @@ class connection(object):
                 cwd = os.getcwd()+'/'+ data['name']
                 subprocess.check_call('mkdir %s' %data['name'],shell=True,cwd = os.getcwd())
                 subprocess.check_call('wget %s' %address,shell=True,cwd = cwd)
+                subprocess.check_call('echo eula=true>eula.txt', shell=True, cwd=cwd)
                 sock.send('ok'.encode('utf-8'))
 
             elif data['step'] == 'process':
                 if data['control'] == 'start':
-                    self.a[data['name']] = cmd()
-                    self.a[data['name']].start('java -jar %s' %data['mc'])
+                    cwd = '/home/' + data['name']+'/'
+                    ml = '/home/' + data['name']+'/' + data['mc']
+                    self.a[data['name']] = cmd(cwd)
+                    self.a[data['name']].start('java -jar %s' % ml)
                     sock.send('ok'.encode('utf-8'))
 
                 elif data['control'] == 'stop':
@@ -98,14 +159,27 @@ class connection(object):
                     sock.send('ok'.encode('utf-8'))
 
                 elif data['control'] =='restart':
+                    cwd = '/home/' + data['name'] + '/'
+                    ml = '/home/' + data['name'] + '/' + data['mc']
                     self.a[data['name']].run_cmd('stop')
-                    self.a[data['name']] = cmd()
-                    self.a[data['name']].start('java -jar %s' % data['mc'])
+                    self.a[data['name']] = cmd(cwd)
+                    self.a[data['name']].start('java -jar %s' % ml)
                     sock.send('ok'.encode('utf-8'))
 
-                elif data['contro;'] =='cmd':
+                elif data['control'] =='cmd':
                     self.a[data['name']].run_cmd(data['cmd'])
                     sock.send('ok'.encode('utf-8'))
+                elif data['control'] =='profile':
+                    name = data['name']
+                    if data['cmd'] == 'get':
+                        data = properties(name).get_dict()
+                        data = json.dumps(data)
+                        sock.send(data.encode('utf-8'))
+                    elif data['cmd'] == 'save':
+                        properties(name).put(data['key'],data['value'])
+                        sock.send('ok'.encode('utf-8'))
+
+
 
 
             elif data['step'] == 'end':
@@ -166,20 +240,15 @@ class java(object):
 
         if n == 7:
             subprocess.check_call(openjdk_ppa, shell=True)
-            print('添加成功')
             subprocess.check_call(update, shell=True)
-            print('更新成功')
-            # subprocess.check_call(jdk7_acc, shell=True)
-            # print('协议同意')
             subprocess.check_call(openjdk7, shell=True)
-            print('安装成功')
         elif n == 8:
             subprocess.check_call(java_ppa, shell=True)
             subprocess.check_call(update, shell=True)
             subprocess.check_call(jdk8_acc, shell=True)
             subprocess.check_call(jdk8, shell=True)
         else:
-            print('参数错误')
+            print('erro')
 
 
     def java_version(self):
