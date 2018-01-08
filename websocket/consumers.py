@@ -5,8 +5,9 @@
 # @File    : consumers.py
 # @Software: PyCharm
 
-import json,psutil,platform
+import json,psutil
 from channels.generic.websockets import WebsocketConsumer
+from connect import con_client
 
 # 实时获取CPU,内存信息
 class MyConsumer(WebsocketConsumer):
@@ -29,6 +30,11 @@ class MyConsumer(WebsocketConsumer):
         }))
 
 
+class cmd(WebsocketConsumer):
+    strict_ordering = False
 
 
+    def connect(self, message, **kwargs):
+        self.message.reply_channel.send({"accept": True})
 
+    # def receive(self, text=None, bytes=None, **kwargs):

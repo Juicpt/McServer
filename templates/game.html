@@ -76,7 +76,7 @@
                         <div class="row">
                             <div class="col-md-4"></div>
                             <div class="col-md-4">
-                                <button type="button" class="btn btn-info">命令控制台</button>
+                                <button type="button" class="btn btn-info" onclick="window.location.href = '{% url 'command' id=id %}'" >命令控制台</button>
                                 <button type="button" class="btn btn-success" onclick="window.location.href = '{% url 'profile' id=id %}'" >服务器配置</button>
                             </div>
                             <div class="col-md-4"></div>

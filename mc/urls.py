@@ -27,9 +27,11 @@ urlpatterns = [
     path('game/', game.as_view(), name='game'),
     path('game/<int:id>/', add_game.as_view(),name = 'add_game'),
     path('game/<int:id>/profile/',profile.as_view(),name='profile'),
+    path('game/<int:id>/command/',TemplateView.as_view(template_name='command.html'), name='command'),
     path('setting/', setting.as_view(), name='setting'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('java/',java.as_view(),name='java'),
     path('game_inf/',game_inf.as_view(),name='game_inf')
+
 
 ]
